@@ -10,13 +10,14 @@ class CustomerExceptionHandlerTest {
 
     @Test
     void handleCustomerNotFoundException_ShouldReturnNotFoundStatus() {
+        Long customerId = 1234567L;
         CustomerExceptionHandler exceptionHandler = new CustomerExceptionHandler();
-        CustomerNotFoundException exception = new CustomerNotFoundException("Customer not found");
+        CustomerNotFoundException exception = new CustomerNotFoundException(customerId);
 
         ResponseEntity<Object> response = exceptionHandler.handleCustomerNotFoundException(exception);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        assertEquals("Customer not found", response.getBody());
+        assertEquals("Customer not found for this id :: " + customerId, response.getBody());
     }
 
     @Test

@@ -2,6 +2,9 @@ package com.digitinary.customerservice.service;
 
 import com.digitinary.customerservice.entity.Customer;
 import com.digitinary.customerservice.exception.CustomerNotFoundException;
+import com.digitinary.customerservice.model.CustomerType;
+import com.digitinary.customerservice.model.dto.CustomerDTO;
+import com.digitinary.customerservice.model.mapper.CustomerMapper;
 import com.digitinary.customerservice.repository.CustomerRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,13 +36,13 @@ class CustomerServiceTest {
     void testCreateCustomer() {
 
         Customer customer = new Customer();
+        customer.setId(1234567L);
         customer.setName("Haroun Jaradat");
+        customer.setType(CustomerType.RETAIL);
 
         when(customerRepository.save(customer)).thenReturn(customer);
 
-
-        Customer createdCustomer = customerService.createCustomer(customer);
-
+        Customer createdCustomer = CustomerMapper.toEntity(customerService.createCustomer(CustomerMapper.toDTO(customer)));
 
         assertNotNull(createdCustomer);
         assertEquals("Haroun Jaradat", createdCustomer.getName());
@@ -49,20 +52,20 @@ class CustomerServiceTest {
     @Test
     void testGetCustomerById() {
 
-        Long customerId = 1L;
+        Long customerId = 1234567L;
         Customer customer = new Customer();
         customer.setId(customerId);
         customer.setName("Haroun Jaradat");
+        customer.setType(CustomerType.RETAIL);
 
         when(customerRepository.findById(customerId)).thenReturn(Optional.of(customer));
 
 
-        Optional<Customer> foundCustomer = customerService.getCustomerById(customerId);
+        CustomerDTO foundCustomer = customerService.getCustomerById(customerId);
 
 
-        assertTrue(foundCustomer.isPresent());
-        assertEquals(customerId, foundCustomer.get().getId());
-        assertEquals("Haroun Jaradat", foundCustomer.get().getName());
+        assertEquals(customerId, foundCustomer.getId());
+        assertEquals("Haroun Jaradat", foundCustomer.getName());
         verify(customerRepository, times(1)).findById(customerId);
     }
 
@@ -70,13 +73,13 @@ class CustomerServiceTest {
     void testGetAllCustomers() {
 
         List<Customer> customers = new ArrayList<>();
-        customers.add(new Customer(1L, "Haroun Jaradat"));
-        customers.add(new Customer(2L, "Mohammad Ahmad"));
+        customers.add(new Customer(1234567L, "Haroun Jaradat", "123", CustomerType.RETAIL, "Amman"));
+        customers.add(new Customer(2234567L, "Mohammad Ahmad", "123", CustomerType.RETAIL, "Amman"));
 
         when(customerRepository.findAll()).thenReturn(customers);
 
 
-        List<Customer> allCustomers = customerService.getAllCustomers();
+        List<CustomerDTO> allCustomers = customerService.getAllCustomers();
 
 
         assertEquals(2, allCustomers.size());
@@ -88,19 +91,21 @@ class CustomerServiceTest {
     @Test
     void testUpdateCustomer() {
 
-        Long customerId = 1L;
+        Long customerId = 1234567L;
         Customer existingCustomer = new Customer();
         existingCustomer.setId(customerId);
         existingCustomer.setName("Haroun Jaradat");
+        existingCustomer.setType(CustomerType.RETAIL);
 
         Customer updatedCustomer = new Customer();
         updatedCustomer.setName("Mohammad Ahmad");
+        updatedCustomer.setType(CustomerType.INVESTMENT);
 
         when(customerRepository.findById(customerId)).thenReturn(Optional.of(existingCustomer));
         when(customerRepository.save(existingCustomer)).thenReturn(existingCustomer);
 
 
-        Customer result = customerService.updateCustomer(customerId, updatedCustomer);
+        CustomerDTO result = customerService.updateCustomer(customerId, CustomerMapper.toDTO(updatedCustomer));
 
 
         assertNotNull(result);
@@ -112,7 +117,7 @@ class CustomerServiceTest {
     @Test
     void testDeleteCustomer() {
 
-        Long customerId = 1L;
+        Long customerId = 1234567L;
         Customer existingCustomer = new Customer();
         existingCustomer.setId(customerId);
         existingCustomer.setName("Haroun Jaradat");
@@ -130,7 +135,7 @@ class CustomerServiceTest {
     @Test
     void testDeleteCustomer_CustomerNotFound() {
 
-        Long customerId = 1L;
+        Long customerId = 1234567L;
 
         when(customerRepository.findById(customerId)).thenReturn(Optional.empty());
 

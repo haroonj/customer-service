@@ -1,6 +1,6 @@
 package com.digitinary.customerservice.controller;
 
-import com.digitinary.customerservice.entity.Customer;
+import com.digitinary.customerservice.model.dto.CustomerDTO;
 import com.digitinary.customerservice.service.CustomerService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,22 +18,22 @@ public class CustomerController {
     }
 
     @PostMapping
-    public ResponseEntity<Customer> createCustomer(@RequestBody Customer customer) {
+    public ResponseEntity<CustomerDTO> createCustomer(@RequestBody CustomerDTO customer) {
         return ResponseEntity.ok(customerService.createCustomer(customer));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Customer> getCustomerById(@PathVariable Long id) {
-        return customerService.getCustomerById(id).map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    public ResponseEntity<CustomerDTO> getCustomerById(@PathVariable Long id) {
+        return ResponseEntity.ok(customerService.getCustomerById(id));
     }
 
     @GetMapping
-    public List<Customer> getAllCustomers() {
+    public List<CustomerDTO> getAllCustomers() {
         return customerService.getAllCustomers();
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Customer> updateCustomer(@PathVariable Long id, @RequestBody Customer customer) {
+    public ResponseEntity<CustomerDTO> updateCustomer(@PathVariable Long id, @RequestBody CustomerDTO customer) {
         return ResponseEntity.ok(customerService.updateCustomer(id, customer));
     }
 
