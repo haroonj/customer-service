@@ -1,6 +1,7 @@
 package com.digitinary.customerservice.service;
 
 import com.digitinary.customerservice.entity.Customer;
+import com.digitinary.customerservice.event.publisher.CustomerEventPublisher;
 import com.digitinary.customerservice.exception.CustomerIdExistsException;
 import com.digitinary.customerservice.exception.CustomerNotFoundException;
 import com.digitinary.customerservice.exception.InvalidCustomerIdException;
@@ -9,20 +10,23 @@ import com.digitinary.customerservice.model.CustomerType;
 import com.digitinary.customerservice.model.dto.CustomerDTO;
 import com.digitinary.customerservice.model.mapper.CustomerMapper;
 import com.digitinary.customerservice.repository.CustomerRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-
+@Slf4j
 @Service
 public class CustomerService {
 
     private final CustomerRepository customerRepository;
+    private final CustomerEventPublisher customerEventPublisher;
 
     @Autowired
-    public CustomerService(CustomerRepository customerRepository) {
+    public CustomerService(CustomerRepository customerRepository, CustomerEventPublisher customerEventPublisher) {
         this.customerRepository = customerRepository;
+        this.customerEventPublisher = customerEventPublisher;
     }
 
     @Transactional
@@ -32,10 +36,13 @@ public class CustomerService {
         if (customerRepository.existsById(customer.getId())) {
             throw new CustomerIdExistsException("Customer ID already exists.");
         }
-        return CustomerMapper.toDTO(
+        CustomerDTO customerDTO = CustomerMapper.toDTO(
                 customerRepository.save(
                         CustomerMapper.toEntity(customer)
                 ));
+        log.debug("Customer created with values {}", customerDTO);
+        customerEventPublisher.publishCustomerCreated(CustomerMapper.toEvent(customerDTO));
+        return customerDTO;
     }
 
     public CustomerDTO getCustomerById(Long id) {
@@ -58,12 +65,15 @@ public class CustomerService {
         customer.setType(CustomerType.valueOf(customerDetails.getType().toUpperCase()));
         customer.setAddress(customerDetails.getAddress());
 
+        log.debug("Customer updated with values {}", customer);
         return CustomerMapper.toDTO(customerRepository.save(customer));
     }
 
     public void deleteCustomer(Long id) {
         Customer customer = customerRepository.findById(id).orElseThrow(() -> new CustomerNotFoundException(id));
         customerRepository.delete(customer);
+        customerEventPublisher.publishCustomerDeleted(CustomerMapper.toEvent(customer));
+
     }
 
     private void validateCustomerID(Long id) {

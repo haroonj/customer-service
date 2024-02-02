@@ -1,6 +1,7 @@
 package com.digitinary.customerservice.service;
 
 import com.digitinary.customerservice.entity.Customer;
+import com.digitinary.customerservice.event.publisher.CustomerEventPublisher;
 import com.digitinary.customerservice.exception.CustomerNotFoundException;
 import com.digitinary.customerservice.model.CustomerType;
 import com.digitinary.customerservice.model.dto.CustomerDTO;
@@ -23,13 +24,15 @@ class CustomerServiceTest {
 
     @Mock
     private CustomerRepository customerRepository;
+    @Mock
+    private CustomerEventPublisher customerEventPublisher;
 
-    @InjectMocks
     private CustomerService customerService;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
+        customerService = new CustomerService(customerRepository, customerEventPublisher);
     }
 
     @Test

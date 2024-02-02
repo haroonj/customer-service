@@ -3,6 +3,7 @@ package com.digitinary.customerservice.model.mapper;
 import com.digitinary.customerservice.entity.Customer;
 import com.digitinary.customerservice.model.CustomerType;
 import com.digitinary.customerservice.model.dto.CustomerDTO;
+import com.digitinary.customerservice.event.model.CustomerEvent;
 
 public class CustomerMapper {
     private CustomerMapper() {
@@ -26,5 +27,24 @@ public class CustomerMapper {
         customerDTO.setType(customer.getType().name());
         customerDTO.setAddress(customer.getAddress());
         return customerDTO;
+    }
+
+    public static CustomerEvent toEvent(CustomerDTO customerDTO) {
+        CustomerEvent event = new CustomerEvent();
+        event.setCustomerId(customerDTO.getId());
+        event.setName(customerDTO.getName());
+        event.setLegalId(customerDTO.getLegalId());
+        event.setType(customerDTO.getType());
+        event.setAddress(customerDTO.getAddress());
+        return event;
+    }
+    public static CustomerEvent toEvent(Customer customer) {
+        CustomerEvent event = new CustomerEvent();
+        event.setCustomerId(customer.getId());
+        event.setName(customer.getName());
+        event.setLegalId(customer.getLegalId());
+        event.setType(String.valueOf(customer.getType()));
+        event.setAddress(customer.getAddress());
+        return event;
     }
 }
